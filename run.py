@@ -3,6 +3,8 @@ import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_absolute_error
+
 
 if os.path.isfile("teams.csv") and os.access("teams.csv", os.R_OK):
     columns_to_keep = ["team", "country", "year", "athletes", "age", "prev_medals", "medals"]
@@ -24,7 +26,12 @@ if os.path.isfile("teams.csv") and os.access("teams.csv", os.R_OK):
     predictions = reg.predict(test[predictors])
     test["predictions"] = predictions
 
-    print(predictions[0:20])
+    test.loc[test["predictions"] < 0, "predictions"] = 0
+    test["predictions"] = test["predictions"].round()
+
+    error = mean_absolute_error(test["medals"], test["predictions"])
+
+    print(test[test["team"] == "FRA"])
 
     # teams.plot.hist(y="medals")
     # plt.show()
