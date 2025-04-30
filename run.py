@@ -1,4 +1,5 @@
 import os
+import numpy as np
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -30,10 +31,19 @@ if os.path.isfile("teams.csv") and os.access("teams.csv", os.R_OK):
     test["predictions"] = test["predictions"].round()
 
     error = mean_absolute_error(test["medals"], test["predictions"])
+    errors = (test["medals"] - test["predictions"]).abs()
+    error_by_team = errors.groupby(test["team"]).mean()
 
-    print(test[test["team"] == "FRA"])
+    medals_by_team = test["medals"].groupby(test["team"]).mean()
+    error_ratio = error_by_team / medals_by_team
+    error_ratio = error_ratio[~pd.isnull(error_ratio)]
+    error_ratio = error_ratio[np.isfinite(error_ratio)]
+
+    error_ratio.plot.hist()
+
+    print(error_ratio)
 
     # teams.plot.hist(y="medals")
-    # plt.show()
+    plt.show()
 else:
     print("Error: 'teams.csv' does not exist or is not readable.")
